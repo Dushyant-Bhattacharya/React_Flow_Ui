@@ -18,7 +18,7 @@ export const flowContext = createContext(initialState);
 function FlowContext({ children }: PropsWithChildren) {
   const [nodes, setNodes] = useState<Node[]>(initialState.nodes);
   const [edges, setEdges] = useState<Edge[]>(initialState.edges);
-  let obj = {
+  const obj = {
     nodes,
     setNodes,
     edges,

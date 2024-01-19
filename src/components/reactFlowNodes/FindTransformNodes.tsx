@@ -1,14 +1,10 @@
-import {
-
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useContext, useEffect, useState } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
 import { flowContext } from "../../Context/FlowContext";
 import { useRootDispatch } from "../../redux/store/hooks";
-import { resultTableActions } from "../../redux/ResultTable/ResultTableSlice";
+import { resultTableActions } from "../../redux/ResultTable/resultTableSlice";
 import useUpdateNodeDataHook from "../../hooks/useUpdateNodeDataHook";
+
 
 type NodeData = {
   value: number;
@@ -22,15 +18,6 @@ function FindTransformNodes({ data }: NodeProps<NodeData>) {
   // const [findSelectVal, setFindSelectVal] = useState<string>("");
   const { updateNodeOriginalData } = useUpdateNodeDataHook();
   const dispatch = useRootDispatch();
-  //   const onChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-  //     // console.log(evt.target.value);
-  //     setInputVal(event.target.value);
-  //   }, []);
-  // const filters = useMemo((data:Array<>)=>{
-  //     return {
-  //         "<" :
-  //     }
-  // },[])
   useEffect(() => {
     if (
       nodes.length > 0 &&
@@ -45,9 +32,11 @@ function FindTransformNodes({ data }: NodeProps<NodeData>) {
   }, [nodes]);
   return (
     <>
+      
       <Handle
         type="target"
         position={Position.Left}
+        className={`nodeid-${data.id}`}
         style={{
           width: 10,
           height: 10,
@@ -58,26 +47,7 @@ function FindTransformNodes({ data }: NodeProps<NodeData>) {
       ${
         data.selected == true && "bg-slate-200 border-blue-300 border"
       } nodeid-${data.id}`}
-        //   onClick={()=>{
-        //     debugger;
-        //     let temp = structuredClone(nodes);
-        //     let index = -1;
-        //     temp.forEach((item,itemIndex)=>{
-        //         if(item.data.id == data.id)
-        //         {
-        //             index = itemIndex
-        //         }
-        //         item.data.selected = false;
-        //     });
-        //     if(index != -1)
-        //     {
-        //         temp[index].data.selected = true;
-        //     }
-        //     setNodes([...temp]);
-
-        //   }}
       >
-        {/* on click of a inputs type node , show the data stored inside its file in the table */}
         {data.key == "find" && (
           <div
             className={`flex flex-col w-11/12 mx-auto p-1 nodeid-${data.id}`}
@@ -87,7 +57,7 @@ function FindTransformNodes({ data }: NodeProps<NodeData>) {
             </h3>
             <div className={`flex flex-col w-full gap-2 nodeid-${data.id}`}>
               <input
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none transition-all duration-150 shadow-md shadow-neutral-400 nodeid-${data.id}"
+                className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none transition-all duration-150 shadow-md shadow-neutral-400 nodeid-${data.id}`}
                 type="text"
                 value={findInputVal}
                 onChange={(event) => {
@@ -98,11 +68,12 @@ function FindTransformNodes({ data }: NodeProps<NodeData>) {
               <button
                 className={`font-semibold border text-blue-700 border-blue-500 px-2 p-1 rounded-lg bg-slate-300  shadow-md hover:bg-blue-500 hover:text-white transition-all duration-150 hover:shadow-lg w-fit self-end hover:shadow-neutral-400 active:bg-blue-600 active:shadow-sm active:shadow-neutral-300 nodeid-${data.id}`}
                 onClick={(event) => {
-                  debugger;
+                  //debugger;
                   event.stopPropagation();
+
                   let tempNodes = structuredClone(nodes);
 
-                  let tempData = structuredClone(
+                  const tempData = structuredClone(
                     tempNodes[Number(data.id)].data.originalData
                   );
                   const filterData = tempData.filter(
@@ -130,7 +101,7 @@ function FindTransformNodes({ data }: NodeProps<NodeData>) {
 
                   tempNodes[Number(data.id)].data.storedData =
                     structuredClone(filterData);
-                  debugger;
+                  //debugger;
                   setNodes([...tempNodes]);
                   dispatch(
                     resultTableActions.setRows(structuredClone(filterData))
@@ -146,6 +117,7 @@ function FindTransformNodes({ data }: NodeProps<NodeData>) {
       <Handle
         type="source"
         position={Position.Right}
+        className={`nodeid-${data.id}`}
         style={{
           width: 10,
           height: 10,

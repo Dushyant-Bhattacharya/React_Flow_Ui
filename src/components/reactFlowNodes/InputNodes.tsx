@@ -10,8 +10,8 @@ import { Handle, Position, NodeProps } from "reactflow";
 import { flowContext } from "../../Context/FlowContext";
 import { parse } from "papaparse";
 import { useRootDispatch } from "../../redux/store/hooks";
-import { resultTableActions } from "../../redux/ResultTable/ResultTableSlice";
-import useUpdateNodeDataHook from "../../hooks/useUpdateNodeDataHook";
+import { resultTableActions } from "../../redux/ResultTable/resultTableSlice";
+// import useUpdateNodeDataHook from "../../hooks/useUpdateNodeDataHook";
 type NodeData = {
   value: number;
   key: string;
@@ -21,7 +21,7 @@ type NodeData = {
 function InputNodes({ data }: NodeProps<NodeData>) {
   const { nodes, setNodes, edges } = useContext(flowContext);
   const [, startTransition] = useTransition();
-  const { updateNodeOriginalData } = useUpdateNodeDataHook();
+  // const { updateNodeOriginalData } = useUpdateNodeDataHook();
   const [inputVal, setInputVal] = useState<string>("");
   const onChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     // console.log(evt.target.value);
@@ -36,23 +36,7 @@ function InputNodes({ data }: NodeProps<NodeData>) {
         className={`bg-neutral-300 rounded-lg w-full flex flex-row overflow-hidden  transition-all duration-150
       ${data.selected == true && "bg-slate-200 border-blue-300 border"}
       nodeid-${data.id}`}
-        // onClick={() => {
-        //   debugger;
-        //   let temp = structuredClone(nodes);
-        //   let index = -1;
-        //   temp.forEach((item, itemIndex) => {
-        //     if (item.data.id == data.id) {
-        //       index = itemIndex;
-        //     }
-        //     item.data.selected = false;
-        //   });
-        //   if (index != -1) {
-        //     temp[index].data.selected = true;
-        //   }
-        //   setNodes([...temp]);
-        // }}
       >
-        {/* on click of a inputs type node , show the data stored inside its file in the table */}
         {data.key == "csv" && (
           <div className={`flex flex-col w-full p-2 nodeid-${data.id}`}>
             <h3 className={`font-semibold text-lg nodeid-${data.id}`}>File</h3>
@@ -83,7 +67,7 @@ function InputNodes({ data }: NodeProps<NodeData>) {
               accept=".csv,.xlsx"
               className="nodrag hidden"
               onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                debugger;
+                //debugger;
                 const nodeData = data;
                 setInputVal(
                   event.target.value.split("\\")[
@@ -94,8 +78,7 @@ function InputNodes({ data }: NodeProps<NodeData>) {
                   const reader = new FileReader();
                   reader.readAsDataURL(event.target.files[0]);
                   reader.onload = (data) => {
-                    debugger;
-
+                    //debugger;
                     startTransition(() => {
                       const result = data.target?.result as string;
                       const jsonCsv = parse(
@@ -115,13 +98,13 @@ function InputNodes({ data }: NodeProps<NodeData>) {
                       }
 
                       if (jsonCsv.errors.length == 0) {
-                        let tempNodes = structuredClone(nodes);
+                        const tempNodes = structuredClone(nodes);
                         tempNodes[Number(nodeData.id)].data.storedData =
                           structuredClone(jsonCsv.data);
                         tempNodes[Number(nodeData.id)].data.originalData =
                           structuredClone(jsonCsv.data);
                         let targetId = "";
-                        let edgeIndex = edges.findIndex((item) => {
+                        const edgeIndex = edges.findIndex((item) => {
                           if (item.source == nodeData.id) {
                             targetId = item.target;
                             return true;
@@ -133,10 +116,11 @@ function InputNodes({ data }: NodeProps<NodeData>) {
                           tempNodes[Number(targetId)].data.originalData =
                             structuredClone(jsonCsv.data);
                         }
-                        tempNodes = updateNodeOriginalData(
-                          nodeData,
-                          structuredClone(jsonCsv.data) as Array<Array<string>>
-                        );
+                        
+                        // tempNodes = updateNodeOriginalData(
+                        //   nodeData,
+                        //   structuredClone(jsonCsv.data) as Array<Array<string>>
+                        // );
 
                         dispatch(resultTableActions.setRows(jsonCsv.data));
                         dispatch(resultTableActions.toogleVisible(true));
@@ -153,6 +137,7 @@ function InputNodes({ data }: NodeProps<NodeData>) {
       <Handle
         type="source"
         position={Position.Right}
+        className={`nodeid-${data.id}`}
         style={{
           width: 10,
           height: 10,

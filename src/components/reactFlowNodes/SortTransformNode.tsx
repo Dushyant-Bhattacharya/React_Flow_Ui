@@ -1,17 +1,12 @@
 import {
-  ChangeEvent,
-  ReactEventHandler,
-  useCallback,
   useContext,
   useEffect,
-  useMemo,
-  useRef,
   useState,
 } from "react";
-import { Handle, Position, NodeProps, getConnectedEdges } from "reactflow";
+import { Handle, Position, NodeProps } from "reactflow";
 import { flowContext } from "../../Context/FlowContext";
 import { useRootDispatch } from "../../redux/store/hooks";
-import { resultTableActions } from "../../redux/ResultTable/ResultTableSlice";
+import { resultTableActions } from "../../redux/ResultTable/resultTableSlice";
 import useUpdateNodeDataHook from "../../hooks/useUpdateNodeDataHook";
 import { notification } from "antd";
 
@@ -22,21 +17,13 @@ type NodeData = {
   id: string;
 };
 function SortTransformNode({ data }: NodeProps<NodeData>) {
-  const { nodes, setNodes, edges } = useContext(flowContext);
+  const { nodes, setNodes } = useContext(flowContext);
   const [sortOrder, setSortOrder] = useState<string>("");
   const [sortColumn, setSortColumn] = useState<string>("");
   const { updateNodeOriginalData } = useUpdateNodeDataHook();
   const dispatch = useRootDispatch();
   const [api, context] = notification.useNotification();
-  //   const onChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-  //     // console.log(evt.target.value);
-  //     setInputVal(event.target.value);
-  //   }, []);
-  // const filters = useMemo((data:Array<>)=>{
-  //     return {
-  //         "<" :
-  //     }
-  // },[])
+
   useEffect(() => {
     if (
       nodes.length > 0 &&
@@ -45,7 +32,7 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
     ) {
       setSortOrder("");
       setSortColumn("");
-      let tempNodes = structuredClone(nodes);
+      const tempNodes = structuredClone(nodes);
       tempNodes[Number(data.id)].data.changed = false;
       setNodes([...tempNodes]);
     }
@@ -56,6 +43,7 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
       <Handle
         type="target"
         position={Position.Left}
+        className={`nodeid-${data.id}`}
         style={{
           width: 10,
           height: 10,
@@ -65,27 +53,8 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
         className={`bg-neutral-300 rounded-lg w-[15rem] flex flex-row overflow-hidden transition-all duration-150
         ${
           data.selected == true && "bg-slate-200 border-blue-300 border"
-        } nodeid-${data.id}`}
-        //   onClick={()=>{
-        //     debugger;
-        //     let temp = structuredClone(nodes);
-        //     let index = -1;
-        //     temp.forEach((item,itemIndex)=>{
-        //         if(item.data.id == data.id)
-        //         {
-        //             index = itemIndex
-        //         }
-        //         item.data.selected = false;
-        //     });
-        //     if(index != -1)
-        //     {
-        //         temp[index].data.selected = true;
-        //     }
-        //     setNodes([...temp]);
-
-        //   }}
+        } nodeid-${data.id}`} 
       >
-        {/* on click of a inputs type node , show the data stored inside its file in the table */}
         {data.key == "sort" && (
           <div
             className={`flex flex-col w-11/12 mx-auto p-1 nodeid-${data.id}`}
@@ -96,7 +65,7 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
                 value={sortColumn}
                 className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-md shadow-neutral-400 outline-none transition-all duration-150 nodeid-${data.id}`}
                 onChange={(event) => {
-                  debugger;
+                  //debugger;
                   setSortColumn(event.target.value);
                 }}
               >
@@ -130,7 +99,7 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
               <button
                 className={`font-semibold border text-blue-700 border-blue-500 px-2 p-1 rounded-lg bg-slate-300  shadow-md hover:bg-blue-500 hover:text-white transition-all duration-150 hover:shadow-lg w-fit self-end hover:shadow-neutral-400 active:bg-blue-600 active:shadow-sm active:shadow-neutral-300 nodeid-${data.id}`}
                 onClick={(event) => {
-                  debugger;
+                  //debugger;
                   event.stopPropagation();
                   if(sortColumn == "" || sortOrder == "")
                   {
@@ -142,7 +111,7 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
                   }
                   let tempNodes = structuredClone(nodes);
 
-                  let tempData = structuredClone(
+                  const tempData = structuredClone(
                     tempNodes[Number(data.id)].data.originalData
                   );
                   let sortData = undefined;
@@ -153,10 +122,10 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
                         return (
                           (a[Number(sortColumn)]
                             .split("")[0]
-                            .charCodeAt(0) as any) -
+                            .charCodeAt(0) as number) -
                           (b[Number(sortColumn)]
                             .split("")[0]
-                            .charCodeAt(0) as any)
+                            .charCodeAt(0) as number)
                         );
                       });
                   }
@@ -167,10 +136,10 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
                         return (
                           (b[Number(sortColumn)]
                             .split("")[0]
-                            .charCodeAt(0) as any) -
+                            .charCodeAt(0) as number) -
                           (a[Number(sortColumn)]
                             .split("")[0]
-                            .charCodeAt(0) as any)
+                            .charCodeAt(0) as number)
                         );
                       });
                   }
@@ -182,7 +151,7 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
 
                   tempNodes[Number(data.id)].data.storedData =
                     structuredClone(sortData);
-                  debugger;
+                  //debugger;
                   setNodes([...tempNodes]);
                   dispatch(
                     resultTableActions.setRows(structuredClone(sortData))
@@ -198,6 +167,7 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
       <Handle
         type="source"
         position={Position.Right}
+        className={`nodeid-${data.id}`}
         style={{
           width: 10,
           height: 10,

@@ -27,7 +27,7 @@ function BlockLibraryModal({ isOpen }: propType) {
             }}
             className="absolute left-0 top-0 w-full h-full flex flex-col justify-center items-center backdrop-blur-sm z-[3]"
           >
-            <div className="flex flex-col w-10/12 bg-white  rounded-lg shadow-lg shadow-neutral-400 h-fit
+            <div className="flex flex-col w-10/12 sm:w-8/12 md:w-8/12 lg:w-4/12 bg-white  rounded-lg shadow-lg shadow-neutral-400 h-fit
             min-h-[40vh]">
               <div className="flex flex-row w-full p-2">
                 <button

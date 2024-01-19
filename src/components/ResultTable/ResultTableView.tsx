@@ -8,7 +8,7 @@ import { useRootDispatch, useRootSelector } from "../../redux/store/hooks";
 
 import { unparse } from "papaparse";
 import { AnimatePresence, motion } from "framer-motion";
-import { resultTableActions } from "../../redux/ResultTable/ResultTableSlice";
+import { resultTableActions } from "../../redux/ResultTable/resultTableSlice";
 type columnType = {
   title: string;
   dataIndex: string;

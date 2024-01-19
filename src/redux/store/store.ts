@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { blockLibModalReducer } from "../BlockLibraryModal/blockLibModalStateSlice";
-import { resultTableReducer } from "../ResultTable/ResultTableSlice";
+import { resultTableReducer } from "../ResultTable/resultTableSlice";
 
 export const store = configureStore({
   reducer: {

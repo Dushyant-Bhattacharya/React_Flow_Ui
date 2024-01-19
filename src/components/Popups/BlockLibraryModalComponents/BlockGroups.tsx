@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useRootDispatch } from "../../../redux/store/hooks";
 import { blockLibModalActions } from "../../../redux/BlockLibraryModal/blockLibModalStateSlice";
 
@@ -18,7 +18,7 @@ export type blockLibComponentItems<T> = {
 
 function BlockGroups() {
   const dispatch = useRootDispatch();
-  const [items, setItems] = useState<blockLibComponentItems<Object>[]>([
+  const [items, setItems] = useState<blockLibComponentItems<object>[]>([
     {
       label: "Inputs",
       icon: "",
@@ -82,7 +82,7 @@ function BlockGroups() {
   return (
     <>
       <ul className="flex flex-col w-full items-start">
-        {items.map((item: blockLibComponentItems<Object>, index: number) => (
+        {items.map((item: blockLibComponentItems<object>, index: number) => (
           <li
             className={`flex flex-row w-full gap-2 font-semibold transition-all duration-150 ${
               item.selected == true &&
@@ -91,7 +91,7 @@ function BlockGroups() {
           >
             <button
               onClick={() => {
-                let tempItems = structuredClone(items);
+                const tempItems = structuredClone(items);
                 tempItems.forEach((item) => {
                   item.selected = false;
                 });

@@ -6,8 +6,8 @@ import {
 
 type initialStateType = {
   isOpen: boolean;
-  currentGroup: blockLibComponentItems<Object> | null;
-  currentBlock?: blockLibComponentBlock<Object> | null;
+  currentGroup: blockLibComponentItems<object> | null;
+  currentBlock?: blockLibComponentBlock<object> | null;
 };
 
 const initialState: initialStateType = {
@@ -24,10 +24,10 @@ const blockLibModalStateSlice = createSlice({
       state.isOpen = !state.isOpen;
     },
     toggleGroup: (state, action) => {
-      state.currentGroup = action.payload as blockLibComponentItems<Object>;
+      state.currentGroup = action.payload as blockLibComponentItems<object>;
     },
     setCurrentBlock: (state, action) => {
-      state.currentBlock = action.payload as blockLibComponentBlock<Object>;
+      state.currentBlock = action.payload as blockLibComponentBlock<object>;
     },
   },
 });

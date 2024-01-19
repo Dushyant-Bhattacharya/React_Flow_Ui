@@ -1,9 +1,7 @@
 import { useContext, useRef } from "react";
 import {
-  Edge,
   Node,
   getConnectedEdges,
-  getIncomers,
   getOutgoers,
 } from "reactflow";
 import { flowContext } from "../Context/FlowContext";
@@ -19,7 +17,7 @@ type multiHandleDatatype = {
 };
 function useUpdateNodeDataHook() {
   const { nodes, edges } = useContext(flowContext);
-  let isLastTarget = useRef(false),
+  const isLastTarget = useRef(false),
     isLastConnectingEdge = useRef(false),
     isLastSource = useRef(true);
 
@@ -27,13 +25,13 @@ function useUpdateNodeDataHook() {
     nodeData: NodeData,
     updatedData: Array<Array<string>> | multiHandleDatatype
   ) {
-    debugger;
+    //debugger;
     let tempUpdatedData = undefined;
     let tempNodes = structuredClone(nodes);
     isLastSource.current = true;
     isLastTarget.current = false;
     isLastConnectingEdge.current = false;
-    let connectedEdges = getConnectedEdges(nodes, edges);
+    const connectedEdges = getConnectedEdges(nodes, edges);
     let index = -1;
     index = connectedEdges.findIndex((item) => {
       if (item.source == nodeData.id) {
@@ -54,12 +52,12 @@ function useUpdateNodeDataHook() {
         tempUpdatedData = (updatedData as multiHandleDatatype)[
           (connectedEdges[index].sourceHandle as string) + "Side"
         ];
-        let outgoers = getOutgoers(
+        const outgoers = getOutgoers(
           tempNodes[Number(connectedEdges[index].source)],
           nodes,
           edges
         );
-        let oppositeEdgeIndex = connectedEdges.findIndex((item) => {
+        const oppositeEdgeIndex = connectedEdges.findIndex((item) => {
           if (
             item.source == nodeData.id &&
             item.sourceHandle != connectedEdges[index].sourceHandle
@@ -67,31 +65,46 @@ function useUpdateNodeDataHook() {
             return true;
           }
         });
-        let tempIsLastSource = isLastSource.current;
-        let tempIsLastTarget = isLastTarget.current;
-        let tempIsLastConnectingEdge = isLastConnectingEdge.current;
+        const tempIsLastSource = isLastSource.current;
+        const tempIsLastTarget = isLastTarget.current;
+        const tempIsLastConnectingEdge = isLastConnectingEdge.current;
         //left
-        if (outgoers.length > 0) {
+        if (outgoers.length > 1) {
           tempNodes = applyRecursiveNodeChange(
             Number(outgoers[0].id),
             tempNodes,
             tempUpdatedData
           );
         }
-
-        tempUpdatedData = (updatedData as multiHandleDatatype)[
-          (connectedEdges[oppositeEdgeIndex].sourceHandle as string) + "Side"
-        ];
-        isLastSource.current = tempIsLastSource;
-        isLastTarget.current = tempIsLastTarget;
-        isLastConnectingEdge.current = tempIsLastConnectingEdge;
-        //right
-        if (outgoers.length > 0) {
+        if (outgoers.length == 1) {
           tempNodes = applyRecursiveNodeChange(
-            Number(outgoers[1].id),
+            Number(outgoers[0].id),
             tempNodes,
             tempUpdatedData
           );
+        }
+        if (oppositeEdgeIndex != -1) {
+          tempUpdatedData = (updatedData as multiHandleDatatype)[
+            (connectedEdges[oppositeEdgeIndex].sourceHandle as string) + "Side"
+          ];
+          isLastSource.current = tempIsLastSource;
+          isLastTarget.current = tempIsLastTarget;
+          isLastConnectingEdge.current = tempIsLastConnectingEdge;
+          //right
+          if (outgoers.length > 1) {
+            tempNodes = applyRecursiveNodeChange(
+              Number(outgoers[1].id),
+              tempNodes,
+              tempUpdatedData
+            );
+          }
+          if (outgoers.length == 1) {
+            tempNodes = applyRecursiveNodeChange(
+              Number(outgoers[0].id),
+              tempNodes,
+              tempUpdatedData
+            );
+          }
         }
 
         return tempNodes;
@@ -107,12 +120,12 @@ function useUpdateNodeDataHook() {
       isLastSource.current = false;
       isLastTarget.current = true;
     }
-    tempNodes[Number(connectedEdges[index].source)].data.storedData =
+    tempNodes[Number(connectedEdges[index].target)].data.storedData =
       structuredClone(tempUpdatedData);
     if (isLastTarget.current == true) {
       return tempNodes;
     }
-    let outgoers = getOutgoers(
+    const outgoers = getOutgoers(
       tempNodes[Number(connectedEdges[index].source)],
       nodes,
       edges
@@ -132,34 +145,58 @@ function useUpdateNodeDataHook() {
     tempNodes: Node[],
     tempUpdatedData: Array<Array<string>>
   ) {
-    let outgoers = getOutgoers(tempNodes[index], nodes, edges);
-    let connectedEdges = getConnectedEdges(nodes, edges);
+    const outgoers = getOutgoers(tempNodes[index], nodes, edges);
+    const connectedEdges = getConnectedEdges(nodes, edges);
     if (tempNodes[index].type == "mergeTransform") {
-      let mergeIncomers = connectedEdges.filter((item) => {
+      const mergeIncomers = connectedEdges.filter((item) => {
         if (Number(item.target) == index) {
           return true;
         }
       });
-      let leftIndex = mergeIncomers.findIndex(
+      const leftIndex = mergeIncomers.findIndex(
         (item) => item.targetHandle == "left"
       );
-      let righttIndex = mergeIncomers.findIndex(
+      const righttIndex = mergeIncomers.findIndex(
         (item) => item.targetHandle == "right"
       );
 
-      let leftAr = structuredClone(
-        tempNodes[Number(mergeIncomers[leftIndex].source)].data.storedData
-      );
+      let leftAr = undefined;
+      if(
+        tempNodes[Number(mergeIncomers[leftIndex].source)].data.storedData.leftSide == undefined
+      )
+      {
+        leftAr = structuredClone(
+          tempNodes[Number(mergeIncomers[leftIndex].source)].data.storedData
+        );
+      }
+      else
+      {
+        leftAr = structuredClone(
+          tempNodes[Number(mergeIncomers[leftIndex].source)].data.storedData.leftSide
+        );
+      }
 
-      let rightAr = structuredClone(
-        tempNodes[Number(mergeIncomers[righttIndex].source)].data.storedData
-      );
+      let rightAr = undefined;
+      if(
+        tempNodes[Number(mergeIncomers[righttIndex].source)].data.storedData.rightSide == undefined
+      )
+      {
+        rightAr = structuredClone(
+          tempNodes[Number(mergeIncomers[righttIndex].source)].data.storedData
+        );
+      }
+      else
+      {
+        rightAr  =structuredClone(
+          tempNodes[Number(mergeIncomers[righttIndex].source)].data.storedData.rightSide
+        );
+      }
 
       if (leftAr.length < rightAr.length) {
-        let diff = Math.abs(leftAr.length - rightAr.length);
-        let cellCount = leftAr[0].length;
+        const diff = Math.abs(leftAr.length - rightAr.length);
+        const cellCount = leftAr[0].length;
         for (let i = 0; i < diff; i++) {
-          let cells = [];
+          const cells = [];
           for (let j = 0; j < cellCount; j++) {
             cells.push("");
           }
@@ -167,17 +204,17 @@ function useUpdateNodeDataHook() {
         }
       }
       if (rightAr.length < leftAr.length) {
-        let diff = Math.abs(leftAr.length - rightAr.length);
-        let cellCount = rightAr[0].length;
+        const diff = Math.abs(leftAr.length - rightAr.length);
+        const cellCount = rightAr[0].length;
         for (let i = 0; i < diff; i++) {
-          let cells = [];
+          const cells = [];
           for (let j = 0; j < cellCount; j++) {
             cells.push("");
           }
           rightAr.push(cells);
         }
       }
-      let newRows = [];
+      const newRows = [];
 
       for (let i = 0; i < leftAr.length; i++) {
         newRows.push([...leftAr[i], ...rightAr[i]]);

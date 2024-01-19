@@ -1,11 +1,4 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { useRootDispatch, useRootSelector } from "../../redux/store/hooks";
 import ReactFlow, {
   Background,
@@ -13,22 +6,20 @@ import ReactFlow, {
   Edge,
   MiniMap,
   Node,
-  NodeDragHandler,
   OnConnect,
   OnEdgesChange,
   OnNodesChange,
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
-  getConnectedEdges,
+  getIncomers,
 } from "reactflow";
-import TextUpdaterNode from "../../components/reactFlowNodes/TextUpdaterNode";
 import "reactflow/dist/style.css";
 import { blockLibModalActions } from "../../redux/BlockLibraryModal/blockLibModalStateSlice";
 import InputNodes from "../../components/reactFlowNodes/InputNodes";
 import { flowContext } from "../../Context/FlowContext";
 import FindTransformNodes from "../../components/reactFlowNodes/FindTransformNodes";
-import { resultTableActions } from "../../redux/ResultTable/ResultTableSlice";
+import { resultTableActions } from "../../redux/ResultTable/resultTableSlice";
 import ResultTableView from "../../components/ResultTable/ResultTableView";
 import FilterTransformNode from "../../components/reactFlowNodes/FilterTransformNode";
 import SortTransformNode from "../../components/reactFlowNodes/SortTransformNode";
@@ -36,7 +27,6 @@ import SplitTransformNode from "../../components/reactFlowNodes/SplitTransformNo
 import MergeTransformNode from "../../components/reactFlowNodes/MergeTransformNode";
 
 const nodetypes = {
-  textUpdater: TextUpdaterNode,
   inputs: InputNodes,
   findTransform: FindTransformNodes,
   filterTransform: FilterTransformNode,
@@ -46,6 +36,7 @@ const nodetypes = {
 };
 
 function Home() {
+  
   const edgeUpdated = useRef(false);
   const dispatch = useRootDispatch();
   // const cached
@@ -59,15 +50,15 @@ function Home() {
     []
   );
   const onEdgesChange: OnEdgesChange = useCallback((changes) => {
-    debugger;
+    //debugger;
     setEdges((eds) => applyEdgeChanges(changes, eds));
   }, []);
   const onConnect: OnConnect = useCallback(
     (params) => {
-      debugger;
-      let targetId = params.target;
-      let sourceId = params.source;
-      let tempNodes = structuredClone(nodes);
+      //debugger;
+      const targetId = params.target;
+      const sourceId = params.source;
+      const tempNodes = structuredClone(nodes);
       if (
         tempNodes[Number(sourceId)].data.storedData !== undefined &&
         tempNodes[Number(sourceId)].data.storedData !== null
@@ -96,16 +87,17 @@ function Home() {
             tempNodes[Number(targetId)].data.originalData =
               structuredClone(copyData);
           } else {
-            let temp: Array<Array<string>> = structuredClone(
+            const temp: Array<Array<string>> = structuredClone(
               tempNodes[Number(targetId)].data.storedData
             );
-            let tempCopyData: Array<Array<string>> = structuredClone(copyData);
+            const tempCopyData: Array<Array<string>> =
+              structuredClone(copyData);
 
             if (temp.length < tempCopyData.length) {
-              let diff = Math.abs(temp.length - tempCopyData.length);
-              let cellCount = temp[0].length;
+              const diff = Math.abs(temp.length - tempCopyData.length);
+              const cellCount = temp[0].length;
               for (let i = 0; i < diff; i++) {
-                let cells = [];
+                const cells = [];
                 for (let j = 0; j < cellCount; j++) {
                   cells.push("");
                 }
@@ -113,20 +105,20 @@ function Home() {
               }
             }
             if (tempCopyData.length < temp.length) {
-              let diff = Math.abs(temp.length - tempCopyData.length);
-              let cellCount = tempCopyData[0].length;
+              const diff = Math.abs(temp.length - tempCopyData.length);
+              const cellCount = tempCopyData[0].length;
               for (let i = 0; i < diff; i++) {
-                let cells = [];
+                const cells = [];
                 for (let j = 0; j < cellCount; j++) {
                   cells.push("");
                 }
                 tempCopyData.push(cells);
               }
             }
-            let newRows = [];
+            const newRows = [];
 
             for (let i = 0; i < temp.length; i++) {
-              let positionObj = {
+              const positionObj = {
                 left: [...tempCopyData[i], ...temp[i]],
                 right: [...temp[i], ...tempCopyData[i]],
               };
@@ -152,9 +144,9 @@ function Home() {
     [nodes]
   );
   useEffect(() => {
-    debugger;
+    //debugger;
     if (edges.length != 0 && edgeUpdated.current == false) {
-      let tempEdges = structuredClone(edges);
+      const tempEdges = structuredClone(edges);
       tempEdges.forEach((item) => {
         item.animated = true;
       });
@@ -163,10 +155,10 @@ function Home() {
     }
   }, [edges]);
   useEffect(() => {
-    debugger;
+    //debugger;
     if (currentBlock != null) {
-      let tempNodes = structuredClone(nodes);
-      let nodePayload: Node = {
+      const tempNodes = structuredClone(nodes);
+      const nodePayload: Node = {
         id: tempNodes.length.toString(),
         data: {
           ...currentBlock,
@@ -192,16 +184,16 @@ function Home() {
   }, [currentBlock]);
 
   const nodeHighlight = (event: React.MouseEvent<Element, MouseEvent>) => {
-    // debugger;
+    //debugger;
 
-    let className = (event.target as Element).className.split(" ");
-    let idIndex = className.findIndex((item) => {
+    const className = (event.target as Element).className.split(" ");
+    const idIndex = className.findIndex((item) => {
       if (item.includes("nodeid-") == true) {
         return true;
       }
     });
-    let index = Number(className[idIndex].split("-")[1]);
-    let tempNodes = structuredClone(nodes);
+    const index = Number(className[idIndex].split("-")[1]);
+    const tempNodes = structuredClone(nodes);
     tempNodes.forEach((item) => {
       item.data.selected = false;
     });
@@ -219,7 +211,7 @@ function Home() {
             resultTableActions.setRows(tempNodes[index].data.storedData)
           );
         } else {
-          let rows: Array<Array<string>> = [];
+          const rows: Array<Array<string>> = [];
           for (
             let i = 0;
             i < tempNodes[index].data.storedData.leftSide.length;
@@ -255,8 +247,8 @@ function Home() {
             <button
               className="font-semibold border text-blue-700 border-blue-500 px-2 p-1 rounded-lg  shadow-md hover:bg-blue-500 hover:text-white transition-all duration-150 hover:shadow-lg hover:shadow-neutral-400 active:bg-blue-600 active:shadow-sm active:shadow-neutral-300 "
               onClick={() => {
-                debugger;
-                let payload = {
+                //debugger;
+                const payload = {
                   nodes: structuredClone(nodes),
                   edges: structuredClone(edges),
                 };
@@ -272,8 +264,8 @@ function Home() {
               className="font-semibold border text-blue-700 border-blue-500 px-2 p-1 rounded-lg  shadow-md hover:bg-blue-500 hover:text-white transition-all duration-150 hover:shadow-lg hover:shadow-neutral-400 active:bg-blue-600 active:shadow-sm active:shadow-neutral-300 "
               onClick={() => {
                 if (localStorage.getItem("dhiwise_workflow") != null) {
-                  debugger;
-                  let payload: {
+                  //debugger;
+                  const payload: {
                     nodes: Node[];
                     edges: Edge[];
                   } = JSON.parse(
@@ -301,19 +293,25 @@ function Home() {
         onNodeClick={nodeHighlight}
         isValidConnection={(event) => {
           // debugger;
-          let targetId = event.target;
-          let index = edges.findIndex((item) => {
+          const targetId = event.target;
+          const index = edges.findIndex((item) => {
             if (item.target == targetId) {
               return true;
             }
           });
-
+          const incomers = getIncomers(nodes[Number(targetId)], nodes, edges);
           if (
-            (index == -1 && nodes[Number(targetId)].data.key == "find") ||
-            nodes[Number(targetId)].data.key == "filter" ||
-            nodes[Number(targetId)].data.key == "sort" ||
-            nodes[Number(targetId)].data.key == "split" ||
-            nodes[Number(targetId)].data.key == "merge"
+            (index == -1 &&
+              (nodes[Number(targetId)].data.key == "find" ||
+                nodes[Number(targetId)].data.key == "filter" ||
+                nodes[Number(targetId)].data.key == "sort")) ||
+            (nodes[Number(targetId)].data.key == "split" &&
+              incomers.length < 2 &&
+              (index == -1 ||
+                event.targetHandle != edges[index].targetHandle)) ||
+            (nodes[Number(targetId)].data.key == "merge" &&
+              incomers.length < 2 &&
+              (index == -1 || event.targetHandle != edges[index].targetHandle))
           ) {
             return true;
           } else {
