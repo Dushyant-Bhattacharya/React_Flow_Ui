@@ -4,6 +4,7 @@ import ReactFlow, {
   Background,
   Controls,
   Edge,
+  // Edge,
   MiniMap,
   Node,
   OnConnect,
@@ -25,6 +26,7 @@ import FilterTransformNode from "../../components/reactFlowNodes/FilterTransform
 import SortTransformNode from "../../components/reactFlowNodes/SortTransformNode";
 import SplitTransformNode from "../../components/reactFlowNodes/SplitTransformNode";
 import MergeTransformNode from "../../components/reactFlowNodes/MergeTransformNode";
+import { notification } from "antd";
 
 const nodetypes = {
   inputs: InputNodes,
@@ -36,10 +38,10 @@ const nodetypes = {
 };
 
 function Home() {
-  
   const edgeUpdated = useRef(false);
   const dispatch = useRootDispatch();
   // const cached
+  const [api,contextHolder] = notification.useNotification();
   const currentBlock = useRootSelector(
     (state) => state.blockLibModalState.currentBlock
   );
@@ -233,6 +235,7 @@ function Home() {
   };
   return (
     <div className="w-full  flex flex-col h-[100vh] ">
+      {contextHolder}
       <div className=" w-full absolute left-0 top-0">
         <nav className="relative z-[2] left-0 top-0 p-2 w-full flex flex-row">
           <button
@@ -244,22 +247,32 @@ function Home() {
             + Blocks
           </button>
           <div className="flex flex-row ml-auto gap-2">
-            <button
-              className="font-semibold border text-blue-700 border-blue-500 px-2 p-1 rounded-lg  shadow-md hover:bg-blue-500 hover:text-white transition-all duration-150 hover:shadow-lg hover:shadow-neutral-400 active:bg-blue-600 active:shadow-sm active:shadow-neutral-300 "
-              onClick={() => {
-                //debugger;
-                const payload = {
-                  nodes: structuredClone(nodes),
-                  edges: structuredClone(edges),
-                };
-                localStorage.setItem(
-                  "dhiwise_workflow",
-                  JSON.stringify(payload)
-                );
-              }}
-            >
-              Save
-            </button>
+            {nodes.length > 0 && (
+              <button
+                className="font-semibold border text-blue-700 border-blue-500 px-2 p-1 rounded-lg  shadow-md hover:bg-blue-500 hover:text-white transition-all duration-150 hover:shadow-lg hover:shadow-neutral-400 active:bg-blue-600 active:shadow-sm active:shadow-neutral-300 "
+                onClick={() => {
+                  //debugger;
+                  const tempNodes = structuredClone(nodes);
+                  tempNodes.forEach((item) => {
+                    item.data.selected = false;
+                  });
+                  const payload = {
+                    nodes: tempNodes,
+                    edges: structuredClone(edges),
+                  };
+                  localStorage.setItem(
+                    "dhiwise_workflow",
+                    JSON.stringify(payload)
+                  );
+                  api.success({
+                    message:"Success",
+                    description:"Workflow Saved Successfully !!"
+                  })
+                }}
+              >
+                Save
+              </button>
+            )}
             <button
               className="font-semibold border text-blue-700 border-blue-500 px-2 p-1 rounded-lg  shadow-md hover:bg-blue-500 hover:text-white transition-all duration-150 hover:shadow-lg hover:shadow-neutral-400 active:bg-blue-600 active:shadow-sm active:shadow-neutral-300 "
               onClick={() => {

@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRootDispatch } from "../../../redux/store/hooks";
 import { blockLibModalActions } from "../../../redux/BlockLibraryModal/blockLibModalStateSlice";
 
@@ -8,6 +8,11 @@ export type blockLibComponentBlock<T> = {
   icon: string;
   type: string;
   storedData: null | Array<T>;
+  userInput?: string;
+  selectedColumn?: string;
+  selectedType?: string;
+  selectedOrder?: string;
+  selectedFileName?: string;
 };
 export type blockLibComponentItems<T> = {
   label: string;
@@ -30,6 +35,7 @@ function BlockGroups() {
           icon: "",
           type: "inputs",
           storedData: null,
+          selectedFileName: "",
         },
       ],
     },
@@ -44,20 +50,24 @@ function BlockGroups() {
           icon: "",
           type: "filterTransform",
           storedData: null,
+          userInput: "",
+          selectedType: "",
+          selectedColumn: "",
         },
-        {
-          label: "Split",
-          key: "split",
-          icon: "",
-          type: "splitTransform",
-          storedData: null,
-        },
+        // {
+        //   label: "Split",
+        //   key: "split",
+        //   icon: "",
+        //   type: "splitTransform",
+        //   storedData: null,
+        // },
         {
           label: "Find",
           key: "find",
           icon: "",
           type: "findTransform",
           storedData: null,
+          userInput: "",
         },
         {
           label: "Sort",
@@ -65,14 +75,16 @@ function BlockGroups() {
           icon: "",
           type: "sortTransform",
           storedData: null,
+          selectedColumn: "",
+          selectedOrder: "",
         },
-        {
-          label: "Merge",
-          key: "merge",
-          icon: "",
-          type: "mergeTransform",
-          storedData: null,
-        },
+        // {
+        //   label: "Merge",
+        //   key: "merge",
+        //   icon: "",
+        //   type: "mergeTransform",
+        //   storedData: null,
+        // },
       ],
     },
   ]);

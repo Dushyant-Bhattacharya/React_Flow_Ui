@@ -1,8 +1,4 @@
-import {
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useContext, useEffect, useState, useTransition } from "react";
 import { Handle, Position, NodeProps } from "reactflow";
 import { flowContext } from "../../Context/FlowContext";
 import { useRootDispatch } from "../../redux/store/hooks";
@@ -15,15 +11,21 @@ type NodeData = {
   key: string;
   selected: boolean;
   id: string;
+  selectedColumn?: string;
+  selectedOrder?: string;
 };
 function SortTransformNode({ data }: NodeProps<NodeData>) {
   const { nodes, setNodes } = useContext(flowContext);
-  const [sortOrder, setSortOrder] = useState<string>("");
-  const [sortColumn, setSortColumn] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<string>(
+    data.selectedOrder != undefined ? data.selectedOrder : ""
+  );
+  const [sortColumn, setSortColumn] = useState<string>(
+    data.selectedColumn != undefined ? data.selectedColumn : ""
+  );
   const { updateNodeOriginalData } = useUpdateNodeDataHook();
   const dispatch = useRootDispatch();
   const [api, context] = notification.useNotification();
-
+  const [, startTransition] = useTransition();
   useEffect(() => {
     if (
       nodes.length > 0 &&
@@ -53,7 +55,7 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
         className={`bg-neutral-300 rounded-lg w-[15rem] flex flex-row overflow-hidden transition-all duration-150
         ${
           data.selected == true && "bg-slate-200 border-blue-300 border"
-        } nodeid-${data.id}`} 
+        } nodeid-${data.id}`}
       >
         {data.key == "sort" && (
           <div
@@ -67,6 +69,10 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
                 onChange={(event) => {
                   //debugger;
                   setSortColumn(event.target.value);
+                  const tempNodes = structuredClone(nodes);
+                  tempNodes[Number(data.id)].data.selectedColumn =
+                    event.target.value;
+                  setNodes([...tempNodes]);
                 }}
               >
                 <option selected value="">
@@ -85,6 +91,10 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
                   value={sortOrder}
                   onChange={(event) => {
                     setSortOrder(event.target.value);
+                    const tempNodes = structuredClone(nodes);
+                    tempNodes[Number(data.id)].data.selectedOrder =
+                      event.target.value;
+                    setNodes([...tempNodes]);
                   }}
                   className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 shadow-md shadow-neutral-400 outline-none transition-all duration-150 nodeid-${data.id}`}
                 >
@@ -101,61 +111,62 @@ function SortTransformNode({ data }: NodeProps<NodeData>) {
                 onClick={(event) => {
                   //debugger;
                   event.stopPropagation();
-                  if(sortColumn == "" || sortOrder == "")
-                  {
-                    api.error({
-                        message:"Error",
-                        description:"All inputs are mandatory !!"
-                    })
-                    return;
-                  }
-                  let tempNodes = structuredClone(nodes);
-
-                  const tempData = structuredClone(
-                    tempNodes[Number(data.id)].data.originalData
-                  );
-                  let sortData = undefined;
-                  if (sortOrder == "0") {
-                    sortData = tempData
-                      .slice(1)
-                      .sort((a: Array<string>, b: Array<string>) => {
-                        return (
-                          (a[Number(sortColumn)]
-                            .split("")[0]
-                            .charCodeAt(0) as number) -
-                          (b[Number(sortColumn)]
-                            .split("")[0]
-                            .charCodeAt(0) as number)
-                        );
+                  startTransition(() => {
+                    if (sortColumn == "" || sortOrder == "") {
+                      api.error({
+                        message: "Error",
+                        description: "All inputs are mandatory !!",
                       });
-                  }
-                  if (sortOrder == "1") {
-                    sortData = tempData
-                      .slice(1)
-                      .sort((a: Array<string>, b: Array<string>) => {
-                        return (
-                          (b[Number(sortColumn)]
-                            .split("")[0]
-                            .charCodeAt(0) as number) -
-                          (a[Number(sortColumn)]
-                            .split("")[0]
-                            .charCodeAt(0) as number)
-                        );
-                      });
-                  }
-                  sortData.unshift(tempData[0]);
-                  tempNodes = updateNodeOriginalData(
-                    data,
-                    structuredClone(sortData)
-                  );
+                      return;
+                    }
+                    let tempNodes = structuredClone(nodes);
 
-                  tempNodes[Number(data.id)].data.storedData =
-                    structuredClone(sortData);
-                  //debugger;
-                  setNodes([...tempNodes]);
-                  dispatch(
-                    resultTableActions.setRows(structuredClone(sortData))
-                  );
+                    const tempData = structuredClone(
+                      tempNodes[Number(data.id)].data.originalData
+                    );
+                    let sortData = undefined;
+                    if (sortOrder == "0") {
+                      sortData = tempData
+                        .slice(1)
+                        .sort((a: Array<string>, b: Array<string>) => {
+                          return (
+                            (a[Number(sortColumn)]
+                              .split("")[0]
+                              .charCodeAt(0) as number) -
+                            (b[Number(sortColumn)]
+                              .split("")[0]
+                              .charCodeAt(0) as number)
+                          );
+                        });
+                    }
+                    if (sortOrder == "1") {
+                      sortData = tempData
+                        .slice(1)
+                        .sort((a: Array<string>, b: Array<string>) => {
+                          return (
+                            (b[Number(sortColumn)]
+                              .split("")[0]
+                              .charCodeAt(0) as number) -
+                            (a[Number(sortColumn)]
+                              .split("")[0]
+                              .charCodeAt(0) as number)
+                          );
+                        });
+                    }
+                    sortData.unshift(tempData[0]);
+                    tempNodes = updateNodeOriginalData(
+                      data,
+                      structuredClone(sortData)
+                    );
+
+                    tempNodes[Number(data.id)].data.storedData =
+                      structuredClone(sortData);
+                    //debugger;
+                    setNodes([...tempNodes]);
+                    dispatch(
+                      resultTableActions.setRows(structuredClone(sortData))
+                    );
+                  });
                 }}
               >
                 Run

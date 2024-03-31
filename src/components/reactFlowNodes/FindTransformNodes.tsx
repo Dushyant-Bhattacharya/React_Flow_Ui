@@ -1,23 +1,38 @@
-import { useContext, useEffect, useState } from "react";
+import {
+  useContext,
+  useDeferredValue,
+  useEffect,
+  useState,
+  useTransition,
+} from "react";
 import { Handle, Position, NodeProps } from "reactflow";
 import { flowContext } from "../../Context/FlowContext";
 import { useRootDispatch } from "../../redux/store/hooks";
 import { resultTableActions } from "../../redux/ResultTable/resultTableSlice";
 import useUpdateNodeDataHook from "../../hooks/useUpdateNodeDataHook";
 
-
 type NodeData = {
   value: number;
   key: string;
   selected: boolean;
   id: string;
+  userInput?: string;
 };
 function FindTransformNodes({ data }: NodeProps<NodeData>) {
   const { nodes, setNodes } = useContext(flowContext);
-  const [findInputVal, setFindInputVal] = useState<string>("");
+  const [findInputVal, setFindInputVal] = useState<string>(
+    data.userInput != undefined ? data.userInput : ""
+  );
+  const defferedInputVal = useDeferredValue(findInputVal);
+  useEffect(() => {
+    const tempNodes = structuredClone(nodes);
+    tempNodes[Number(data.id)].data.userInput = defferedInputVal;
+    setNodes([...tempNodes]);
+  }, [defferedInputVal]);
   // const [findSelectVal, setFindSelectVal] = useState<string>("");
   const { updateNodeOriginalData } = useUpdateNodeDataHook();
   const dispatch = useRootDispatch();
+  const [, startTransition] = useTransition();
   useEffect(() => {
     if (
       nodes.length > 0 &&
@@ -32,7 +47,6 @@ function FindTransformNodes({ data }: NodeProps<NodeData>) {
   }, [nodes]);
   return (
     <>
-      
       <Handle
         type="target"
         position={Position.Left}
@@ -70,42 +84,43 @@ function FindTransformNodes({ data }: NodeProps<NodeData>) {
                 onClick={(event) => {
                   //debugger;
                   event.stopPropagation();
+                  startTransition(() => {
+                    let tempNodes = structuredClone(nodes);
 
-                  let tempNodes = structuredClone(nodes);
-
-                  const tempData = structuredClone(
-                    tempNodes[Number(data.id)].data.originalData
-                  );
-                  const filterData = tempData.filter(
-                    (item: Array<string>, index: number) => {
-                      if (index == 0) {
-                        return true;
-                      }
-                      let flag = false;
-                      for (let i = 0; i < item.length; i++) {
-                        if (item[i].includes(findInputVal) == true) {
-                          flag = true;
-                          break;
+                    const tempData = structuredClone(
+                      tempNodes[Number(data.id)].data.originalData
+                    );
+                    const filterData = tempData.filter(
+                      (item: Array<string>, index: number) => {
+                        if (index == 0) {
+                          return true;
+                        }
+                        let flag = false;
+                        for (let i = 0; i < item.length; i++) {
+                          if (item[i].includes(findInputVal) == true) {
+                            flag = true;
+                            break;
+                          }
+                        }
+                        if (flag == true) {
+                          return true;
                         }
                       }
-                      if (flag == true) {
-                        return true;
-                      }
-                    }
-                  );
+                    );
 
-                  tempNodes = updateNodeOriginalData(
-                    data,
-                    structuredClone(filterData)
-                  );
+                    tempNodes = updateNodeOriginalData(
+                      data,
+                      structuredClone(filterData)
+                    );
 
-                  tempNodes[Number(data.id)].data.storedData =
-                    structuredClone(filterData);
-                  //debugger;
-                  setNodes([...tempNodes]);
-                  dispatch(
-                    resultTableActions.setRows(structuredClone(filterData))
-                  );
+                    tempNodes[Number(data.id)].data.storedData =
+                      structuredClone(filterData);
+                    //debugger;
+                    setNodes([...tempNodes]);
+                    dispatch(
+                      resultTableActions.setRows(structuredClone(filterData))
+                    );
+                  });
                 }}
               >
                 Run
